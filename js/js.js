@@ -86,6 +86,8 @@ var xRayKoning = false;
 
 var alleMoves;
 
+var node;
+
 // Dit is om de timers om te zetten
 function timerBlack() {
   secondeBlack = secondeBlack - 1;
@@ -118,9 +120,6 @@ function timerWhite() {
   }
 
 }
-
-
-
 
 
 // Dit is om illegaale moves te voorkomen
@@ -163,8 +162,6 @@ function movePossible(piece) {
 
     }
   }
-
-
 
   // ***********
   // Einde white Pawn
@@ -835,6 +832,11 @@ function checkOfCastlenMag() {
 
     if (event.target.classList[0] == 'white') {
 
+      moves = document.querySelectorAll('.possibleMove');
+      for (let i = 0; i < moves.length; i++) {
+        moves[i].classList.remove('possibleMove');
+      }
+// Dit checkt of iets de lijn van jou king naar je rook kan zien
       for (let i = 0; i < piecesBlack.length; i++) {
         aanZet = 'black';
         piecesBlack[i].click();
@@ -849,22 +851,21 @@ function checkOfCastlenMag() {
 
       aanZet = 'white';
       castlenMag = true;
-      alleMoves = document.querySelectorAll('.possibleMove');
-      for (let i = 0; i < alleMoves.length; i++) {
-        alleMoves[i].classList.remove('possibleMove');
+      moves = document.querySelectorAll('.possibleMove');
+      for (let i = 0; i < moves.length; i++) {
+        moves[i].classList.remove('possibleMove');
       }
-
       chessboard.children[7].children[4].children[0].click();
     }
 
-
-
-
-
     if (event.target.classList[0] == 'black') {
 
-      blackKingPosition = event.target;
+      moves = document.querySelectorAll('.possibleMove');
+      for (let i = 0; i < moves.length; i++) {
+        moves[i].classList.remove('possibleMove');
+      }
 
+// Dit checkt of iets de lijn van jou king naar je rook kan zien
       for (let i = 0; i < piecesWhite.length; i++) {
         aanZet = 'white';
         piecesWhite[i].click();
@@ -880,6 +881,10 @@ function checkOfCastlenMag() {
 
       aanZet = 'black';
       castlenMag = true;
+      moves = document.querySelectorAll('.possibleMove');
+      for (let i = 0; i < moves.length; i++) {
+        moves[i].classList.remove('possibleMove');
+      }
       chessboard.children[0].children[4].children[0].click()
     }
 
@@ -904,7 +909,7 @@ function checkCheckMate() {
   checkInProgress = true;
 
   if (aanZet == 'black') {
-
+// Dit kijkt of je king wordt aangevallen
     for (let i = 0; i < piecesBlack.length; i++) {
       if (piecesBlack[i].classList[1] == 'king') {
         piecesBlack[i].click();
@@ -920,8 +925,12 @@ function checkCheckMate() {
 
     checkMateNietMogelijk = false;
     moves = document.querySelectorAll('.possibleMove');
-    if (moves.length == '0' && attackBestaat == true) {
-
+    if (attackBestaat == true) {
+// Dit kijkt of je king ergens heen kan
+      if (moves.length != '0'){
+        checkMateNietMogelijk = true;
+      }
+// Dit kijkt of je pieces kunnen slaan of blokken
       for (let i = 0; i < piecesBlack.length; i++) {
         piecesBlack[i].click();
         moves = document.querySelectorAll('.possibleMove');
@@ -930,12 +939,14 @@ function checkCheckMate() {
         }
       }
     }
-
+// Als beide boven niet waar zijn sta je checkmate
     if (attackBestaat == true && checkMateNietMogelijk == false) {
       winScreen.classList.add('won');
       winText.innerHTML = 'White wins by checkmate';
     }
   } else {
+
+// Dit kijkt of je king wordt aangevallen
 
     for (let i = 0; i < piecesWhite.length; i++) {
       if (piecesWhite[i].classList[1] == 'king') {
@@ -952,7 +963,16 @@ function checkCheckMate() {
 
     checkMateNietMogelijk = false;
     moves = document.querySelectorAll('.possibleMove');
-    if (moves.length == '0' && attackBestaat == true) {
+
+    if (attackBestaat == true) {
+
+// Dit kijkt of je king ergens heen kan
+
+      if (moves.length != '0'){
+        checkMateNietMogelijk = true;
+      }
+
+// Dit kijkt of je pieces kunnen slaan of blokken
 
       for (let i = 0; i < piecesWhite.length; i++) {
         piecesWhite[i].click();
@@ -962,14 +982,12 @@ function checkCheckMate() {
         }
       }
     }
-
+// Als beide boven niet waar zijn sta je checkmate
     if (attackBestaat == true && checkMateNietMogelijk == false) {
       winScreen.classList.add('won');
       winText.innerHTML = 'Black wins by checkmate';
     }
   }
-
-
 
   checkInProgress = false;
   checkMateNietMogelijk = false;
@@ -1047,11 +1065,16 @@ function selectPiece(event) {
       }
 
       // dit zorgt ervoor dat als je enpassant je de pawn achter je ook echt slaat
-      if (event.target.classList[2] == 'enemyMove' && event.target.children.length == '0') {
+      if (event.target.classList[2] == 'enemyMove' && event.target.children.length == '0' && activePiece.classList[1] == 'pawn') {
         if (aanZet == 'white') {
-          chessboard.children[3].children[event.target.classList[0]].innerHTML = '';
-        } else {
-          chessboard.children[4].children[event.target.classList[0]].innerHTML = '';
+          node = document.createElement("LI");
+          node.appendChild(chessboard.children[3].children[event.target.classList[0]].children[0]);
+          verlorenPiecesBlack.appendChild(node);
+
+        } else if (event.target.classList[2] == 'enemyMove' && event.target.children.length == '0' && activePiece.classList[1] == 'pawn'){
+          node = document.createElement("LI");
+          node.appendChild(chessboard.children[4].children[event.target.classList[0]].children[0]);
+  verlorenPiecesWhite.appendChild(node);
         }
 
       }
@@ -1123,12 +1146,13 @@ function selectPiece(event) {
       moveAllowed = false;
 
       // Dit zorgt ervoor dat als je iets slaat het onder of boven het bord komt te staan
+
       if (aanZet == 'white') {
-        var node = document.createElement("LI");
+        node = document.createElement("LI");
         node.appendChild(event.target);
         verlorenPiecesBlack.appendChild(node);
       } else {
-        var node = document.createElement("LI");
+        node = document.createElement("LI");
         node.appendChild(event.target);
         verlorenPiecesWhite.appendChild(node);
       }
@@ -1597,7 +1621,7 @@ function selectPiece(event) {
     for (let i = 0; i < alleEnemyAttacks.length; i++) {
       alleEnemyAttacks[i].classList.remove('enemyAttack');
     }
-
+// Dit zorgt dat je je eigen dingen niet kan slaan voor white
     if (activePiece.classList[0] == 'white') {
       for (let i = 0; i < mogelijkeMoves.length; i++) {
         if (mogelijkeMoves[i].children.length != '0') {
@@ -1607,6 +1631,7 @@ function selectPiece(event) {
         }
       }
 
+// Dit zorgt ervoor dat als het een enemy is je een andere icoon krijgt
       for (let i = 0; i < mogelijkeMoves.length; i++) {
         if (mogelijkeMoves[i].children.length != '0') {
           if (mogelijkeMoves[i].children[0].classList[0] == 'black') {
@@ -1615,6 +1640,7 @@ function selectPiece(event) {
         }
       }
 
+// Dit kijkt of de move mogelijk is doordat je geen illegaale moves mag maken
       for (let i = 0; i < piecesBlack.length; i++) {
         movePossible(piecesBlack[i]);
       }
@@ -1622,6 +1648,7 @@ function selectPiece(event) {
 
     }
 
+// Dit zorgt dat je je eigen dingen niet kan slaan voor black
     if (activePiece.classList[0] == 'black') {
       for (let i = 0; i < mogelijkeMoves.length; i++) {
         if (mogelijkeMoves[i].children.length != '0') {
@@ -1629,8 +1656,9 @@ function selectPiece(event) {
             mogelijkeMoves[i].classList.remove('possibleMove');
           }
         }
-
       }
+
+      // Dit zorgt ervoor dat als het een enemy is je een andere icoon krijgt
       for (let i = 0; i < mogelijkeMoves.length; i++) {
         if (mogelijkeMoves[i].children.length != '0') {
           if (mogelijkeMoves[i].children[0].classList[0] == 'white') {
@@ -1639,13 +1667,13 @@ function selectPiece(event) {
         }
       }
 
-
+// Dit kijkt of de move mogelijk is doordat je geen illegaale moves mag maken
       for (let i = 0; i < piecesWhite.length; i++) {
         movePossible(piecesWhite[i]);
       }
-
     }
 
+    // Dit zorgt dat de king niet ergens heen kan dat een enemy piece of pawn kan zien
     if (activePiece.classList[1] == 'king') {
       moves = document.querySelectorAll('.possibleMove');
       for (let i = 0; i < moves.length; i++) {
@@ -1658,6 +1686,7 @@ function selectPiece(event) {
       }
     }
 
+// Dit checkt of je schaak staat
     if (activePiece.classList[1] != 'king') {
       for (let i = 0; i < alleBlokjes.length; i++) {
         for (let u = 0; u < alleBlokjes[i].classList.length; u++) {
@@ -1680,7 +1709,6 @@ function selectPiece(event) {
             if (moves[i].classList[u] == 'padNaarKoning') {
               moveIsGoed = true;
             }
-
           }
           if (moveIsGoed == false) {
             moves[i].classList.remove('possibleMove');
@@ -1718,7 +1746,16 @@ function selectPiece(event) {
 
   }
 
+  moves = document.querySelectorAll('.possibleMove');
 
+  if (aanZet == event.target.classList[0] && moveAllowed == true) {
+  if (activePiece.parentElement.parentElement.parentElement.classList[0] == 'verlorenPieces') {
+    for (var i = 0; i < moves.length; i++) {
+      moves[i].classList.remove('possibleMove');
+      moves[i].classList.remove('enemyMove');
+    }
+  }
+}
 
 }
 
