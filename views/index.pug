@@ -1,0 +1,60 @@
+doctype html
+html(lang='nl')
+  head
+    title= "Chess Daan Zwarthoed"
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css")
+    link(rel = "apple-touch-icon" type = "image/png" href = "images/whiteKing.png")
+    link(rel = "icon" type = "image/png" href = "images/whiteKing.png")
+  style 
+    include ../static/public/css.css
+
+mixin squarePiece(number, colorPiece, color, piece)
+  div(class=number)
+    img(src=`images/${colorPiece}.png` alt=`${color} ${piece}` class=`${color} ${piece}`)
+
+mixin row(number, nonePawnOrPieces, color)
+  div(class=number)
+    if nonePawnOrPieces === "pieces"
+      +squarePiece("0", `${color}Rook`, color, "rook")
+      +squarePiece("1", `${color}Knight`, color, "knight")
+      +squarePiece("2", `${color}Bishop`, color, "bishop")
+      +squarePiece("3", `${color}Queen`, color, "queen")
+      +squarePiece("4", `${color}King`, color, "king")
+      +squarePiece("5", `${color}Bishop`, color, "bishop")
+      +squarePiece("6", `${color}Knight`, color, "knight")
+      +squarePiece("7", `${color}Rook`, color, "rook")
+    else
+      each time in ["0", "1", "2", "3", "4", "5", "6", "7"]
+        div(class=time)
+          if nonePawnOrPieces === "pawn"
+            img(src=`images/${color}Pawn.png` alt=`${color} pawn` class=`${color} pawn`)
+
+body
+  main
+    section.verlorenPieces
+      ul
+    div
+      +row("0", "pieces", "black")
+      +row("1", "pawn", "black")
+      +row("2", "none")
+      +row("3", "none")
+      +row("4", "none")
+      +row("5", "none")
+      +row("6", "pawn", "white")
+      +row("7", "pieces", "white")
+    section.verlorenPieces
+      ul
+  section
+    div.clockBlack
+      div 10
+      div 00
+    div.clockWhite
+      div 10
+      div 00
+  section 
+    div
+      p
+      button(type="button" name="button") restart
+      button(type="button" name="button") Hide overlay  
+script(type="module")
+  include ../static/public/js.js

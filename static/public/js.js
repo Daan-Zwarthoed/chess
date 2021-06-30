@@ -1,92 +1,74 @@
-var chessboard = document.querySelector('main > div');
+let chessboard = document.querySelector('main > div');
 
-var alleBlokjes = document.querySelectorAll('main > div > div > div');
+let alleBlokjes = document.querySelectorAll('main > div > div > div');
 
-var verlorenPiecesWhite = document.querySelector('main > section:first-of-type > ul');
+let verlorenPiecesWhite = document.querySelector('main > section:first-of-type > ul');
 
-var verlorenPiecesBlack = document.querySelector('main > section:last-of-type > ul');
+let verlorenPiecesBlack = document.querySelector('main > section:last-of-type > ul');
 
-var piecesWhite = document.querySelectorAll('main > div > div > div > .white');
+let piecesWhite = document.querySelectorAll('main > div > div > div > .white');
 
-var piecesBlack = document.querySelectorAll('main > div > div > div > .black');
+let piecesBlack = document.querySelectorAll('main > div > div > div > .black');
 
-var mogelijkeMoves;
+let mogelijkeMoves;
 
-var checkInProgress = false;
+let checkInProgress = false;
 
-var aanZet = 'white';
+let aanZet = 'white';
 
-var moveAllowed;
+let moveAllowed;
 
-var winScreen = document.querySelector('body > section:last-of-type');
+let winScreen = document.querySelector('body > section:last-of-type');
 
-var winText = document.querySelector('body > section:last-of-type > div > p');
+let winText = document.querySelector('body > section:last-of-type > div > p');
 
-var tweeStappenPawn;
+let pawnEersteStap;
 
-var pawnEersteStap;
+let allePieces;
 
-var allePieces;
+let activePiece; 
 
-var currentPiece;
+let currentPiece;
 
-var dezeMove;
+let dezeMove;
 
-var gevarenMoves;
+let ietsTegenGekomen;
 
-var ietsTegenGekomen;
+let checkMateNietMogelijk = true;
 
-var xRaySquares;
+let attackBestaat = false;
+let pinBestaat = false;
+let moveIsGoed = false;
 
-var checkingForCheckMate = false;
+let blackKingMoved = false;
+let whiteKingMoved = false;
+let leftBlackRookMoved = false;
+let rightBlackRookMoved = false;
+let leftWhiteRookMoved = false;
+let rightWhiteRookMoved = false;
 
-var checkMateNietMogelijk = true;
+let clockBlackMinuten = document.querySelector('.clockBlack > div:first-of-type');
+let clockBlackSeconde = document.querySelector('.clockBlack > div:last-of-type');
+let minutenBlack = clockBlackMinuten.innerHTML;
+let secondeBlack = clockBlackSeconde.innerHTML;
 
-var attackBestaatEnKingKanNietBewegen = false;
+let clockWhiteMinuten = document.querySelector('.clockWhite > div:first-of-type');
+let clockWhiteSeconde = document.querySelector('.clockWhite > div:last-of-type');
+let minutenWhite = clockWhiteMinuten.innerHTML;
+let secondeWhite = clockWhiteSeconde.innerHTML;
+let timeBlack;
+let timeWhite;
 
-var attackBestaat = false;
-var pinBestaat = false;
-var moveIsGoed = false;
+let moves;
+let h = 0;
+let p;
 
-var blackKingMoved = false;
-var whiteKingMoved = false;
-var leftBlackRookMoved = false;
-var rightBlackRookMoved = false;
-var leftWhiteRookMoved = false;
-var rightWhiteRookMoved = false;
-var castlenMag = false;
+let enemyOnderAttack;
 
-var clockBlack = document.querySelector('.clockBlack');
-var clockBlackMinuten = document.querySelector('.clockBlack > div:first-of-type');
-var clockBlackSeconde = document.querySelector('.clockBlack > div:last-of-type');
-var minutenBlack = clockBlackMinuten.innerHTML;
-var secondeBlack = clockBlackSeconde.innerHTML;
+let raaktKoning = false;
+let xRayKoning = false;
 
-var clockWhite = document.querySelector('.clockWhite');
-var clockWhiteMinuten = document.querySelector('.clockWhite > div:first-of-type');
-var clockWhiteSeconde = document.querySelector('.clockWhite > div:last-of-type');
-var minutenWhite = clockWhiteMinuten.innerHTML;
-var secondeWhite = clockWhiteSeconde.innerHTML;
-var timeBlack;
-var timeWhite;
-
-var moves;
-var moveMagNiet = [];
-var kingMovesNietMogelijk;
-var h = 0;
-var whiteKingPosition;
-var blackKingPosition;
-var p;
-var l;
-
-var enemyOnderAttack;
-
-var raaktKoning = false;
-var xRayKoning = false;
-
-var alleMoves;
-
-var node;
+let node;
 
 // Dit is om de timers om te zetten
 function timerBlack() {
@@ -118,24 +100,23 @@ function timerWhite() {
     winScreen.classList.add('won');
     winText.innerHTML = 'Black wins by timer';
   }
-
 }
 
 
 // Dit is om illegaale moves te voorkomen
 function movePossible(piece) {
 
-  var slag = piece.parentElement;
+  let slag = piece.parentElement;
 
-  var rowPiece = piece.parentElement.parentElement.className;
+  let rowPiece = piece.parentElement.parentElement.className;
 
-  var columnPiece = piece.parentElement.classList[0];
+  let columnPiece = piece.parentElement.classList[0];
 
   moveAllowed = true;
 
-  var activePiece = piece;
+  activePiece = piece;
 
-  var currentPiece = slag.children[0];
+  let currentPiece = slag.children[0];
 
   if (currentPiece.classList[0] == 'white' && currentPiece.classList[1] == 'pawn') {
 
@@ -850,7 +831,6 @@ function checkOfCastlenMag() {
       }
 
       aanZet = 'white';
-      castlenMag = true;
       moves = document.querySelectorAll('.possibleMove');
       for (let i = 0; i < moves.length; i++) {
         moves[i].classList.remove('possibleMove');
@@ -880,7 +860,6 @@ function checkOfCastlenMag() {
       }
 
       aanZet = 'black';
-      castlenMag = true;
       moves = document.querySelectorAll('.possibleMove');
       for (let i = 0; i < moves.length; i++) {
         moves[i].classList.remove('possibleMove');
@@ -902,9 +881,9 @@ function checkOfCastlenMag() {
 
 function checkCheckMate() {
 
-  var piecesWhite = document.querySelectorAll('main > div > div > div > .white');
+  let piecesWhite = document.querySelectorAll('main > div > div > div > .white');
 
-  var piecesBlack = document.querySelectorAll('main > div > div > div > .black');
+  let piecesBlack = document.querySelectorAll('main > div > div > div > .black');
 
   checkInProgress = true;
 
@@ -1003,17 +982,18 @@ function checkCheckMate() {
 
 function selectPiece(event) {
   // Dit gebeurt er als je een zet doet
-  var slag = event.target.parentElement;
+  let slag = event.target.parentElement;
 
-  var rowPiece = event.target.parentElement.parentElement.className;
+  console.log(event.target);
 
-  var columnPiece = event.target.parentElement.classList[0];
+  let rowPiece = event.target.parentElement.parentElement.className;
+
+  let columnPiece = event.target.parentElement.classList[0];
 
   moveAllowed = true;
 
   // Dit is als je een pawn of piecebeweegt
   if (event.target.classList[1] == 'possibleMove' || event.target.classList[2] == 'possibleMove' || event.target.classList[3] == 'possibleMove' || event.target.parentElement.classList[1] == 'possibleMove' || event.target.parentElement.classList[2] == 'possibleMove' || event.target.parentElement.classList[3] == 'possibleMove') {
-
     // dit is om de klok te starten
     if (aanZet == 'black') {
       window.clearInterval(timeBlack);
@@ -1024,7 +1004,6 @@ function selectPiece(event) {
       window.clearInterval(timeWhite);
       timeBlack = window.setInterval(timerBlack, 1000);
     }
-
     clockBlackMinuten.innerHTML = minutenBlack;
 
 
@@ -1045,14 +1024,13 @@ function selectPiece(event) {
     allePieces = document.querySelectorAll('main > div > div > div > img');
 
     // Dit haalt alle en passant weg
-    for (var i = 0; i < allePieces.length; i++) {
+    for (let i = 0; i < allePieces.length; i++) {
       if (allePieces[i].classList.length == '3') {
         allePieces[i].classList.remove('enPassantMogelijk')
       }
     }
 
     pawnEersteStap = false;
-    tweeStappenPawn = false;
 
     if (event.target.classList[1] == 'possibleMove') {
 
@@ -1125,12 +1103,10 @@ function selectPiece(event) {
 
       // Dit kijkt of je 2 stappen naar voren zet
       if (currentPiece.parentElement.parentElement.classList[0] == [4] && pawnEersteStap == true) {
-        tweeStappenPawn = true;
         currentPiece.classList.add('enPassantMogelijk')
       }
 
       if (currentPiece.parentElement.parentElement.classList[0] == [3] && pawnEersteStap == true) {
-        tweeStappenPawn = true;
         currentPiece.classList.add('enPassantMogelijk')
       }
 
@@ -1616,7 +1592,7 @@ function selectPiece(event) {
 
     dezeMove = event.target;
 
-    var alleEnemyAttacks = document.querySelectorAll('.enemyAttack');
+    let alleEnemyAttacks = document.querySelectorAll('.enemyAttack');
 
     for (let i = 0; i < alleEnemyAttacks.length; i++) {
       alleEnemyAttacks[i].classList.remove('enemyAttack');
@@ -1750,7 +1726,7 @@ function selectPiece(event) {
 
   if (aanZet == event.target.classList[0] && moveAllowed == true) {
   if (activePiece.parentElement.parentElement.parentElement.classList[0] == 'verlorenPieces') {
-    for (var i = 0; i < moves.length; i++) {
+    for (let i = 0; i < moves.length; i++) {
       moves[i].classList.remove('possibleMove');
       moves[i].classList.remove('enemyMove');
     }
@@ -1764,7 +1740,7 @@ chessboard.addEventListener('click', function() {
 });
 
 
-var restartKnop = document.querySelector('body > section > div > button:first-of-type');
+let restartKnop = document.querySelector('body > section > div > button:first-of-type');
 
 function restart() {
   location.reload();
@@ -1772,10 +1748,11 @@ function restart() {
 
 restartKnop.addEventListener('click', restart);
 
-var hideOverlayKnop = document.querySelector('body > section > div > button:last-of-type');
+let hideOverlayKnop = document.querySelector('body > section > div > button:last-of-type');
 
 function hideOverlayToggle() {
   winScreen.classList.remove('won');
 }
 
 hideOverlayKnop.addEventListener('click', hideOverlayToggle);
+
