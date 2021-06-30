@@ -56,5 +56,7 @@ body
       p
       button(type="button" name="button") restart
       button(type="button" name="button") Hide overlay  
-script(type="module")
-  include ../static/public/js.js
+
+  script(src="/socket.io/socket.io.js")
+  script(type="module")
+    include ../static/public/js.js
