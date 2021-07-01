@@ -20,8 +20,62 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.locals.basedir = path.join(__dirname, "views");
 
+const { MongoClient } = require("mongodb");
+const uri =
+  "mongodb+srv://ANYONE:rDjStnckO5W9gvlm@daan-zwarthoed-blok-tec.ei2ci.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+const client = new MongoClient(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+client.connect((err) => {
+  if (err) throw err;
+  db = client.db("my-chess-app");
+  matchCollection = db.collection("matches");
+});
+
 app.get("/", (req, res) => {
-  res.render("index");
+  res.render("index", { popupStatus: "show" });
+});
+
+let popupStatus;
+
+app.post("/", (req, res) => {
+  if (req.body.room) {
+    matchCollection
+      .findOne({ room: req.body.room })
+      .then((results) => {
+        if (results) {
+          if (results.users.includes(req.body.username)) {
+            popupStatus = "hidden";
+            res.render("index", { roomName: req.body.room, popupStatus });
+          } else if (results.users.length === 2) {
+            popupStatus = "full";
+          } else {
+            matchCollection.findOneAndUpdate(
+              { room: req.body.room },
+              {
+                $push: {
+                  users: req.body.username,
+                },
+              },
+              {
+                upsert: true,
+              }
+            );
+            popupStatus = "hidden";
+          }
+        } else {
+          matchCollection.insertOne({
+            room: req.body.room,
+            users: [req.body.username],
+          });
+          popupStatus = "hidden";
+        }
+      })
+      .then(() => {
+        // res.render("index", { roomName: req.body.room, popupStatus });
+      });
+  }
 });
 
 app.get("*", function (req, res) {
@@ -30,9 +84,33 @@ app.get("*", function (req, res) {
 
 io.on("connection", (socket) => {
   socket.on("move", (move) => {
-    io.emit("move", {
-      move,
-    });
+    matchCollection.findOneAndUpdate(
+      { room: move.room },
+      {
+        $push: {
+          moves: move,
+        },
+      },
+      {
+        upsert: true,
+      }
+    );
+    io.to(move.room).emit("move", move);
+  });
+
+  socket.on("join room", (room) => {
+    if (room) {
+      socket.join(room);
+      matchCollection.findOne({ room: room }).then((results) => {
+        if (results) {
+          if (results.moves.length !== 0) {
+            for (let i = 0; i < results.moves.length; i++) {
+              io.to(room).emit("move", results.moves[i]);
+            }
+          }
+        }
+      });
+    }
   });
 });
 

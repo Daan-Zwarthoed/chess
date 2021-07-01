@@ -79,14 +79,50 @@ let raaktKoning = false;
 let xRayKoning = false;
 
 let node;
-
 var activePiece;
 
 // eslint-disable-next-line no-undef
 const socket = io();
 
+// SEND TO SOCKET JOIN ROOM
+
+const roomPopup = document.querySelector(".roomPopup");
+const roomName = document.querySelector(".roomName");
+const form = document.querySelector(".roomForm");
+const usernameInput = document.querySelector(".usernameInput");
+const roomInput = document.querySelector(".roomInput");
+let room = document.querySelector(".roomName").innerHTML;
+let username = "";
+
+if (form) {
+  form.addEventListener("submit", function () {
+    if (roomInput.value) {
+      room = roomInput.value;
+      username = usernameInput.value;
+      socket.emit("join room", { username, room });
+      roomName.innerHTML = room;
+    }
+    roomPopup.classList.remove("showPopup");
+  });
+}
+
+socket.emit("join room", room);
+
+// RECIEVE FROM SOCKET
+
 socket.on("move", function (move) {
-  console.log(move);
+  let oldPosition =
+    chessboard.children[move.rowPiece].children[move.columnPiece];
+  let newPosition =
+    chessboard.children[move.rowTarget].children[move.columnTarget];
+  if (oldPosition.children[0]) {
+    oldPosition.children[0].click();
+  }
+  if (newPosition.children[0]) {
+    newPosition.children[0].click();
+  } else {
+    newPosition.click();
+  }
 });
 
 // Dit is om de timers om te zetten
@@ -101,7 +137,7 @@ function timerBlack() {
 
   if (minutenBlack < 0) {
     window.clearInterval(timeBlack);
-    winScreen.classList.add("won");
+    winScreen.classList.add("showPopup");
     winText.innerHTML = "White wins by timer";
   }
 }
@@ -116,7 +152,7 @@ function timerWhite() {
   clockWhiteSeconde.innerHTML = secondeWhite;
   if (minutenWhite < 0) {
     window.clearInterval(timeWhite);
-    winScreen.classList.add("won");
+    winScreen.classList.add("showPopup");
     winText.innerHTML = "Black wins by timer";
   }
 }
@@ -1166,7 +1202,7 @@ function checkCheckMate() {
     }
     // Als beide boven niet waar zijn sta je checkmate
     if (attackBestaat == true && checkMateNietMogelijk == false) {
-      winScreen.classList.add("won");
+      winScreen.classList.add("showPopup");
       winText.innerHTML = "White wins by checkmate";
     }
   } else {
@@ -1207,7 +1243,7 @@ function checkCheckMate() {
     }
     // Als beide boven niet waar zijn sta je checkmate
     if (attackBestaat == true && checkMateNietMogelijk == false) {
-      winScreen.classList.add("won");
+      winScreen.classList.add("showPopup");
       winText.innerHTML = "Black wins by checkmate";
     }
   }
@@ -1242,6 +1278,7 @@ function selectPiece(event) {
     event.target.parentElement.classList[2] == "possibleMove" ||
     event.target.parentElement.classList[3] == "possibleMove"
   ) {
+    // EMIT TO SOCKET
     let rowTarget;
     let columnTarget;
     if (
@@ -1254,10 +1291,14 @@ function selectPiece(event) {
       rowTarget = event.target.parentElement.className;
       columnTarget = event.target.classList[0];
     }
-
+    let rowPiece = activePiece.parentElement.parentElement.classList[0];
+    let columnPiece = activePiece.parentElement.classList[0];
     socket.emit("move", {
-      rowTarget: rowTarget,
-      columnTarget: columnTarget,
+      rowTarget,
+      columnTarget,
+      rowPiece,
+      columnPiece,
+      room,
     });
 
     // dit is om de klok te starten
@@ -1425,7 +1466,7 @@ function selectPiece(event) {
 
       // Dit kijkt of er iemand wint
       if (event.target.classList[1] == "king") {
-        winScreen.classList.add("won");
+        winScreen.classList.add("showPopup");
 
         if (aanZet == "white") {
           winText.innerHTML = "White wins";
@@ -2200,7 +2241,7 @@ let hideOverlayKnop = document.querySelector(
 );
 
 function hideOverlayToggle() {
-  winScreen.classList.remove("won");
+  winScreen.classList.remove("showPopup");
 }
 
 hideOverlayKnop.addEventListener("click", hideOverlayToggle);

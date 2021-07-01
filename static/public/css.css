@@ -1,11 +1,12 @@
-html, *{
-  margin:0;
+html,
+* {
+  margin: 0;
   box-sizing: border-box;
 }
 
-html, body{
+html,
+body {
   height: 100%;
-
 }
 
 body {
@@ -14,29 +15,28 @@ body {
   background-color: grey;
 }
 
-main{
-height: 100vh;
-padding-left: 2em;
-display: flex;
-flex-direction: column;
+main {
+  height: 100vh;
+  padding-left: 2em;
+  display: flex;
+  flex-direction: column;
 }
 
-main > div{
+main > div {
   width: 80vh;
   height: 80vh;
   max-width: 80vw;
   max-height: 80vw;
 }
 
-main > div > div{
-height: 12.5%;
-width: 100%;
-display: flex;
-flex-direction: row;
-
+main > div > div {
+  height: 12.5%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
 }
 
-main > div > div > div{
+main > div > div > div {
   height: 100%;
   width: 12.5%;
   display: flex;
@@ -44,79 +44,91 @@ main > div > div > div{
   align-items: center;
 }
 
-main > div > div:nth-of-type(2n) > div:nth-of-type(2n){
+main > div > div:nth-of-type(2n) > div:nth-of-type(2n) {
   background-color: white;
 }
 
-main > div > div:nth-of-type(2n) > div:nth-of-type(2n + 1){
+main > div > div:nth-of-type(2n) > div:nth-of-type(2n + 1) {
   background-color: #1ba129;
 }
 
-main > div > div:nth-of-type(2n + 1) > div:nth-of-type(2n){
+main > div > div:nth-of-type(2n + 1) > div:nth-of-type(2n) {
   background-color: #1ba129;
 }
 
-main > div > div:nth-of-type(2n + 1) > div:nth-of-type(2n + 1){
+main > div > div:nth-of-type(2n + 1) > div:nth-of-type(2n + 1) {
   background-color: white;
 }
 
-.lastMove{
+.lastMove {
   background-color: #6be895 !important;
 }
 
-main > div > div > div > img{
+main > div > div > div > img {
   height: 100%;
   width: 100%;
   padding: 10%;
-
 }
 
-main > div > div > div > img:hover, .possibleMove:hover{
+main > div > div > div > img:hover,
+.possibleMove:hover {
   cursor: pointer;
 }
 
-main > section > ul{
-display: flex;
-flex-direction: row;
-padding-left: 0;
-height: 2em;
+main > section {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
-main > section > ul > li{
-display: flex;
-
+main > section > p {
+  color: white;
+  font-size: 1.5em;
 }
 
-main > section > ul > li > img{
-height: 2em;
-width: 2em;
+main > section > ul {
+  display: flex;
+  flex-direction: row;
+  padding-left: 0;
+  height: 2em;
 }
 
+main > section > ul > li {
+  display: flex;
+}
 
-.possibleMove{
-  background-image: url('../images/availableSpotOpen.png') !important;
+main > section > ul > li > img {
+  height: 2em;
+  width: 2em;
+}
+
+.possibleMove {
+  background-image: url("../images/availableSpotOpen.png") !important;
   background-size: 20%;
   background-position: center;
   background-repeat: no-repeat;
 }
 
-.enemyMove{
-  background-image: url('../images/availableSpotEnemy.png') !important;
+.enemyMove {
+  background-image: url("../images/availableSpotEnemy.png") !important;
   background-size: 80% !important;
   background-position: center;
   background-repeat: no-repeat;
 }
 
-body > section:last-of-type{
+body .popup {
   background-color: rgba(162, 171, 165, 0.5);
   position: fixed;
   display: none;
-  top: 0; bottom: 0; left: 0; right: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   justify-content: center;
   align-items: center;
 }
 
-body > section:last-of-type > div{
+body .popup > div {
   width: 30vh;
   height: 30vh;
   background-color: white;
@@ -127,13 +139,13 @@ body > section:last-of-type > div{
   border-radius: 30%;
 }
 
-body > section:last-of-type > div > button{
+body .popup > div > button {
   background-color: white;
   border-style: solid;
   margin-top: 2em;
 }
 
-.won{
+.showPopup {
   display: flex !important;
 }
 
@@ -145,7 +157,7 @@ body > section:first-of-type {
   padding-top: 2em;
 }
 
-body > section:first-of-type > div{
+body > section:first-of-type > div {
   display: flex;
   flex-direction: row;
 }
@@ -154,8 +166,7 @@ body > section:first-of-type > div > div {
   height: 1.2em;
   width: 3em;
   background-color: white;
-  margin: .5em;
+  margin: 0.5em;
   display: flex;
   justify-content: center;
-
 }

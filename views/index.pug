@@ -33,6 +33,9 @@ body
   main
     section.verlorenPieces
       ul
+      div 
+        p.roomName= roomName
+        a(href="/") nieuwe lobby
     div
       +row("0", "pieces", "black")
       +row("1", "pawn", "black")
@@ -51,7 +54,18 @@ body
     div.clockWhite
       div 10
       div 00
-  section 
+  if popupStatus != "hidden"
+    section(class="roomPopup popup showPopup") 
+      div
+        if popupStatus == "full"
+          p Room is full, join different room
+        form(class="roomForm" method="post" action="/") 
+          label Username
+          input(class="usernameInput" name="username" autocomplete="off" required)
+          label Choose a room name
+          input(class="roomInput" name="room" autocomplete="off" required)
+          button Join
+  section.popup 
     div
       p
       button(type="button" name="button") restart
