@@ -33,10 +33,7 @@ body
   main
     section.verlorenPieces
       ul
-      div 
-        p.roomName= roomName
-        a(href="/") nieuwe lobby
-    div
+    div(class=userColor)
       +row("0", "pieces", "black")
       +row("1", "pawn", "black")
       +row("2", "none")
@@ -47,29 +44,43 @@ body
       +row("7", "pieces", "white")
     section.verlorenPieces
       ul
-  section
+  section(class=userColor)
     div.clockBlack
-      div 10
-      div 00
+      div= timer ? timer.minutenBlack : 10
+      div= timer ? timer.secondeBlack : 00
     div.clockWhite
-      div 10
-      div 00
+      div= timer ? timer.minutenWhite : 10
+      div= timer ? timer.secondeWhite : 00
   if popupStatus != "hidden"
     section(class="roomPopup popup showPopup") 
       div
         if popupStatus == "full"
-          p Room is full, join different room
+          p Room is full, join different room or spectate
+          a.spectateButton Click here to spectate
         form(class="roomForm" method="post" action="/") 
           label Username
           input(class="usernameInput" name="username" autocomplete="off" required)
           label Choose a room name
           input(class="roomInput" name="room" autocomplete="off" required)
           button Join
+  section 
+    div.playerInfo 
+      div
+        p User name:
+        p.userName= userName
+      div
+        p Room name:
+        p.roomName= roomName
+      div
+        p User color:
+        p.userColor= userColor
+      a(href="/") nieuwe lobby
+      a.testLink test link
   section.popup 
     div
       p
       button(type="button" name="button") restart
-      button(type="button" name="button") Hide overlay  
+      a(href="/") nieuwe lobby
 
   script(src="/socket.io/socket.io.js")
   script(type="module")

@@ -66,8 +66,6 @@ let clockWhiteSeconde = document.querySelector(
 );
 let minutenWhite = clockWhiteMinuten.innerHTML;
 let secondeWhite = clockWhiteSeconde.innerHTML;
-let timeBlack;
-let timeWhite;
 
 let moves;
 let h = 0;
@@ -81,18 +79,18 @@ let xRayKoning = false;
 let node;
 var activePiece;
 
+let userColor = document.querySelector(".userColor").innerHTML;
 // eslint-disable-next-line no-undef
 const socket = io();
 
 // SEND TO SOCKET JOIN ROOM
-
 const roomPopup = document.querySelector(".roomPopup");
 const roomName = document.querySelector(".roomName");
 const form = document.querySelector(".roomForm");
 const usernameInput = document.querySelector(".usernameInput");
 const roomInput = document.querySelector(".roomInput");
 let room = document.querySelector(".roomName").innerHTML;
-let username = "";
+let username = document.querySelector(".userName").innerHTML;
 
 if (form) {
   form.addEventListener("submit", function () {
@@ -106,56 +104,41 @@ if (form) {
   });
 }
 
-socket.emit("join room", room);
+socket.emit("join room", { room, username });
 
-// RECIEVE FROM SOCKET
+socket.emit("start timer", room);
 
-socket.on("move", function (move) {
-  let oldPosition =
-    chessboard.children[move.rowPiece].children[move.columnPiece];
-  let newPosition =
-    chessboard.children[move.rowTarget].children[move.columnTarget];
-  if (oldPosition.children[0]) {
-    oldPosition.children[0].click();
-  }
-  if (newPosition.children[0]) {
-    newPosition.children[0].click();
-  } else {
-    newPosition.click();
-  }
-});
-
-// Dit is om de timers om te zetten
-function timerBlack() {
-  secondeBlack--;
-  if (secondeBlack <= 0) {
-    minutenBlack--;
-    clockBlackMinuten.innerHTML = minutenBlack;
-    secondeBlack = 59;
-  }
-  clockBlackSeconde.innerHTML = secondeBlack;
+socket.on("timer update", function (req) {
+  clockWhiteMinuten.innerHTML = req.minutenWhite;
+  clockWhiteSeconde.innerHTML = req.secondeWhite;
+  clockBlackMinuten.innerHTML = req.minutenBlack;
+  clockBlackSeconde.innerHTML = req.secondeBlack;
 
   if (minutenBlack < 0) {
-    window.clearInterval(timeBlack);
     winScreen.classList.add("showPopup");
     winText.innerHTML = "White wins by timer";
-  }
-}
-
-function timerWhite() {
-  secondeWhite--;
-  if (secondeWhite <= 0) {
-    minutenWhite--;
-    clockWhiteMinuten.innerHTML = minutenWhite;
-    secondeWhite = 59;
-  }
-  clockWhiteSeconde.innerHTML = secondeWhite;
-  if (minutenWhite < 0) {
-    window.clearInterval(timeWhite);
+  } else if (minutenWhite < 0) {
     winScreen.classList.add("showPopup");
     winText.innerHTML = "Black wins by timer";
   }
-}
+});
+
+// RECIEVE FROM SOCKET
+
+socket.on("load board", function (req) {
+  if (req.username != username) {
+    chessboard.innerHTML = req.chessboard;
+    aanZet = req.aanZet;
+    checkCheckMate();
+    for (let i = 0; i < alleBlokjes.length; i++) {
+      alleBlokjes[i].classList.remove("possibleMove");
+    }
+  }
+});
+
+socket.on("page reload", function () {
+  location.reload();
+});
 
 // Dit is om illegaale moves te voorkomen
 function movePossible(piece) {
@@ -322,6 +305,9 @@ function movePossible(piece) {
 
     for (let i = +columnPiece + 1; i <= 7; i++) {
       if (xRayKoning == true) {
+        chessboard.children[rowPiece].children[columnPiece].classList.add(
+          "xRayNaarKoning"
+        );
         chessboard.children[rowPiece].children[i].classList.add(
           "xRayNaarKoning"
         );
@@ -394,6 +380,9 @@ function movePossible(piece) {
     // Dit is voor de rook naar links X-ray
     for (let i = columnPiece - 1; i >= 0; i--) {
       if (xRayKoning == true) {
+        chessboard.children[rowPiece].children[columnPiece].classList.add(
+          "xRayNaarKoning"
+        );
         chessboard.children[rowPiece].children[i].classList.add(
           "xRayNaarKoning"
         );
@@ -467,6 +456,10 @@ function movePossible(piece) {
     // Dit is voor de rook omhoog X-ray
     for (let i = rowPiece - 1; i >= 0; i--) {
       if (xRayKoning == true) {
+        chessboard.children[rowPiece].children[columnPiece].classList.add(
+          "xRayNaarKoning"
+        );
+
         chessboard.children[i].children[columnPiece].classList.add(
           "xRayNaarKoning"
         );
@@ -541,6 +534,10 @@ function movePossible(piece) {
     // Dit is voor de rook omlaag X-ray
     for (let i = +rowPiece + 1; i <= 7; i++) {
       if (xRayKoning == true) {
+        chessboard.children[rowPiece].children[columnPiece].classList.add(
+          "xRayNaarKoning"
+        );
+
         chessboard.children[i].children[columnPiece].classList.add(
           "xRayNaarKoning"
         );
@@ -631,6 +628,9 @@ function movePossible(piece) {
       if (rowPiece - i >= "0" && +columnPiece + i <= "7") {
         h = i - 1;
         if (xRayKoning == true) {
+          chessboard.children[rowPiece].children[columnPiece].classList.add(
+            "xRayNaarKoning"
+          );
           chessboard.children[rowPiece - h].children[
             +columnPiece + h
           ].classList.add("xRayNaarKoning");
@@ -719,6 +719,9 @@ function movePossible(piece) {
         h = i - 1;
 
         if (xRayKoning == true) {
+          chessboard.children[rowPiece].children[columnPiece].classList.add(
+            "xRayNaarKoning"
+          );
           chessboard.children[+rowPiece + h].children[
             +columnPiece + h
           ].classList.add("xRayNaarKoning");
@@ -807,6 +810,9 @@ function movePossible(piece) {
         h = i - 1;
 
         if (xRayKoning == true) {
+          chessboard.children[rowPiece].children[columnPiece].classList.add(
+            "xRayNaarKoning"
+          );
           chessboard.children[+rowPiece + h].children[
             columnPiece - h
           ].classList.add("xRayNaarKoning");
@@ -895,6 +901,9 @@ function movePossible(piece) {
         h = i - 1;
 
         if (xRayKoning == true) {
+          chessboard.children[rowPiece].children[columnPiece].classList.add(
+            "xRayNaarKoning"
+          );
           chessboard.children[rowPiece - h].children[
             columnPiece - h
           ].classList.add("xRayNaarKoning");
@@ -1075,11 +1084,15 @@ function movePossible(piece) {
 // Einde horse
 // ***********
 
-function checkOfCastlenMag() {
+function checkOfCastlenMag(event) {
   if (checkInProgress == false) {
     checkInProgress = true;
 
-    if (event.target.classList[0] == "white") {
+    if (
+      event.target.classList[0] == "white" &&
+      event.target.parentElement ==
+        chessboard.children[7].children[4].children[0]
+    ) {
       moves = document.querySelectorAll(".possibleMove");
       for (let i = 0; i < moves.length; i++) {
         moves[i].classList.remove("possibleMove");
@@ -1116,7 +1129,11 @@ function checkOfCastlenMag() {
       chessboard.children[7].children[4].children[0].click();
     }
 
-    if (event.target.classList[0] == "black") {
+    if (
+      event.target.classList[0] == "black" &&
+      event.target.parentElement ==
+        chessboard.children[0].children[4].children[0]
+    ) {
       moves = document.querySelectorAll(".possibleMove");
       for (let i = 0; i < moves.length; i++) {
         moves[i].classList.remove("possibleMove");
@@ -1168,6 +1185,8 @@ function checkCheckMate() {
   );
 
   checkInProgress = true;
+  let userColorCopy = userColor;
+  userColor = aanZet;
 
   if (aanZet == "black") {
     // Dit kijkt of je king wordt aangevallen
@@ -1247,7 +1266,7 @@ function checkCheckMate() {
       winText.innerHTML = "Black wins by checkmate";
     }
   }
-
+  userColor = userColorCopy;
   checkInProgress = false;
   checkMateNietMogelijk = false;
 }
@@ -1259,6 +1278,8 @@ function selectPiece(event) {
   let rowPiece = event.target.parentElement.parentElement.className;
 
   let columnPiece = event.target.parentElement.classList[0];
+
+  alleBlokjes = document.querySelectorAll("main > div > div > div");
 
   if (
     (event.target.classList[0] === "black" ||
@@ -1278,40 +1299,6 @@ function selectPiece(event) {
     event.target.parentElement.classList[2] == "possibleMove" ||
     event.target.parentElement.classList[3] == "possibleMove"
   ) {
-    // EMIT TO SOCKET
-    let rowTarget;
-    let columnTarget;
-    if (
-      event.target.classList[0] === "white" ||
-      event.target.classList[0] === "black"
-    ) {
-      rowTarget = event.target.parentElement.parentElement.classList[0];
-      columnTarget = event.target.parentElement.classList[0];
-    } else {
-      rowTarget = event.target.parentElement.className;
-      columnTarget = event.target.classList[0];
-    }
-    let rowPiece = activePiece.parentElement.parentElement.classList[0];
-    let columnPiece = activePiece.parentElement.classList[0];
-    socket.emit("move", {
-      rowTarget,
-      columnTarget,
-      rowPiece,
-      columnPiece,
-      room,
-    });
-
-    // dit is om de klok te starten
-    if (aanZet == "black") {
-      window.clearInterval(timeBlack);
-      timeWhite = window.setInterval(timerWhite, 1000);
-    }
-    if (aanZet == "white") {
-      window.clearInterval(timeWhite);
-      timeBlack = window.setInterval(timerBlack, 1000);
-    }
-    clockBlackMinuten.innerHTML = minutenBlack;
-
     // Dit haalt last move weg
     for (let i = 0; i < alleBlokjes.length; i++) {
       alleBlokjes[i].classList.remove("lastMove");
@@ -1488,6 +1475,18 @@ function selectPiece(event) {
     piecesBlack = document.querySelectorAll("main > div > div > div > .black");
 
     checkCheckMate();
+
+    // EMIT TO SOCKET
+    socket.emit("move", {
+      chessboard: chessboard.innerHTML,
+      aanZet,
+      room,
+      username,
+      secondeWhite,
+      minutenWhite,
+      secondeBlack,
+      minutenBlack,
+    });
   }
 
   piecesBlack = document.querySelectorAll("main > div > div > div > .black");
@@ -1501,8 +1500,11 @@ function selectPiece(event) {
   }
 
   // Dit checkt wie er aan de beurt is
-
-  if (aanZet == event.target.classList[0] && moveAllowed == true) {
+  if (
+    aanZet == event.target.classList[0] &&
+    moveAllowed == true &&
+    aanZet == userColor
+  ) {
     activePiece = event.target;
 
     currentPiece = slag.children[0];
@@ -1941,7 +1943,7 @@ function selectPiece(event) {
         }
 
         if (checkInProgress == false) {
-          checkOfCastlenMag();
+          checkOfCastlenMag(event);
         }
       }
 
@@ -1998,7 +2000,7 @@ function selectPiece(event) {
           }
         }
         if (checkInProgress == false) {
-          checkOfCastlenMag();
+          checkOfCastlenMag(event);
         }
       }
     }
@@ -2231,7 +2233,7 @@ let restartKnop = document.querySelector(
 );
 
 function restart() {
-  location.reload();
+  socket.emit("reset room", { room });
 }
 
 restartKnop.addEventListener("click", restart);
@@ -2239,9 +2241,20 @@ restartKnop.addEventListener("click", restart);
 let hideOverlayKnop = document.querySelector(
   "body > section > div > button:last-of-type"
 );
+const spectateButton = document.querySelector(".spectateButton");
 
 function hideOverlayToggle() {
-  winScreen.classList.remove("showPopup");
+  if (roomPopup) roomPopup.classList.remove("showPopup");
+  if (winScreen) winScreen.classList.remove("showPopup");
 }
 
 hideOverlayKnop.addEventListener("click", hideOverlayToggle);
+if (spectateButton) {
+  spectateButton.addEventListener("click", hideOverlayToggle);
+}
+
+function windowReload() {
+  location.reload();
+}
+
+window.addEventListener("mouseenter", windowReload);
