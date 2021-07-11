@@ -193,19 +193,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("timer request", (req) => {
-    if (req) {
-      io.to(req.room).emit("timer request", {
-        secondeWhite: req.secondeWhite,
-        minutenWhite: req.minutenWhite,
-        secondeBlack: req.secondeBlack,
-        minutenBlack: req.minutenBlack,
-        room: req.room,
-        username: req.username,
-      });
-    }
-  });
-
   socket.on("reset room", (req) => {
     matchCollection
       .findOneAndUpdate(

@@ -106,8 +106,6 @@ if (form) {
 
 socket.emit("join room", { room, username });
 
-socket.emit("start timer", room);
-
 socket.on("timer update", function (req) {
   clockWhiteMinuten.innerHTML = req.minutenWhite;
   clockWhiteSeconde.innerHTML = req.secondeWhite;
@@ -1477,6 +1475,8 @@ function selectPiece(event) {
     checkCheckMate();
 
     // EMIT TO SOCKET
+    socket.emit("start timer", room);
+
     socket.emit("move", {
       chessboard: chessboard.innerHTML,
       aanZet,

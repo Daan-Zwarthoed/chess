@@ -138,14 +138,15 @@ body .popup {
 }
 
 body .popup > div {
-  width: 30vh;
-  height: 30vh;
+  width: 35vh;
+  height: 35vh;
   background-color: white;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   flex-direction: column;
   border-radius: 30%;
+  padding-left: 3em;
 }
 
 body .popup > div > button {
@@ -184,14 +185,46 @@ body > section:first-of-type > div > div {
   justify-content: center;
 }
 
+.roomPopup div form {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.5em;
+}
+
+.roomPopup div p {
+  max-width: 65%;
+}
+
+a,
+button {
+  margin-top: 0.5em;
+  border-radius: 5px;
+  background-color: rgb(235, 235, 235);
+  padding: 3px;
+  border: 1px solid #000;
+  color: black;
+  text-decoration: none;
+}
+
+a:hover,
+button:hover {
+  cursor: pointer;
+}
+
+.roomPopup div form button,
+.roomPopup div form label:nth-of-type(2) {
+  margin-top: 0.5em;
+  width: fit-content;
+}
+
 .playerInfo > div {
   display: flex;
   flex-direction: row;
   color: white;
 }
 
-.playerInfo > a {
-  color: white;
+.playerInfo > div:last-of-type {
+  margin-bottom: 0.5em;
 }
 
 .playerInfo > div > p:first-of-type {

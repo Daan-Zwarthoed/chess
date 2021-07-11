@@ -56,7 +56,7 @@ body
       div
         if popupStatus == "full"
           p Room is full, join different room or spectate
-          a.spectateButton Click here to spectate
+          a.spectateButton Spectate
         form(class="roomForm" method="post" action="/") 
           label Username
           input(class="usernameInput" name="username" autocomplete="off" required)
@@ -74,13 +74,12 @@ body
       div
         p User color:
         p.userColor= userColor
-      a(href="/") nieuwe lobby
-      a.testLink test link
+      a(href="/") New lobby
   section.popup 
     div
       p
-      button(type="button" name="button") restart
-      a(href="/") nieuwe lobby
+      button(type="button" name="button") Restart
+      a(href="/") New lobby
 
   script(src="/socket.io/socket.io.js")
   script(type="module")
