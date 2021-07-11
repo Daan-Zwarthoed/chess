@@ -1,4 +1,6 @@
-let chessboard = document.querySelector("main > div");
+let main = document.querySelector("main");
+
+let chessboard;
 
 let alleBlokjes = document.querySelectorAll("main > div > div > div");
 
@@ -125,11 +127,30 @@ socket.on("timer update", function (req) {
 
 socket.on("load board", function (req) {
   if (req.username != username) {
-    chessboard.innerHTML = req.chessboard;
+    main.innerHTML = req.main;
     aanZet = req.aanZet;
+
     checkCheckMate();
+
+    chessboard = document.querySelector("main > div");
+
+    alleBlokjes = document.querySelectorAll("main > div > div > div");
+
+    verlorenPiecesWhite = document.querySelector(
+      "main > section:first-of-type > ul"
+    );
+
+    verlorenPiecesBlack = document.querySelector(
+      "main > section:last-of-type > ul"
+    );
+
+    chessboard.addEventListener("click", function () {
+      selectPiece(event);
+    });
+
     for (let i = 0; i < alleBlokjes.length; i++) {
       alleBlokjes[i].classList.remove("possibleMove");
+      alleBlokjes[i].classList.remove("enemyMove");
     }
   }
 });
@@ -1478,7 +1499,7 @@ function selectPiece(event) {
     socket.emit("start timer", room);
 
     socket.emit("move", {
-      chessboard: chessboard.innerHTML,
+      main: main.innerHTML,
       aanZet,
       room,
       username,
@@ -2223,10 +2244,6 @@ function selectPiece(event) {
     }
   }
 }
-
-chessboard.addEventListener("click", function () {
-  selectPiece(event);
-});
 
 let restartKnop = document.querySelector(
   "body > section > div > button:first-of-type"

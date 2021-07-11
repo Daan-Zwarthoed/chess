@@ -70,16 +70,21 @@ main > div > div > div > img {
   padding: 10%;
 }
 
-main > .black {
+main.black {
+  flex-direction: column-reverse;
+  justify-content: flex-end !important;
+}
+
+.black > div.chessboard {
   transform: rotate(180deg);
 }
 
-main > .black img {
+.black > div.chessboard img {
   transform: rotate(180deg);
 }
 
-main > div.black > div > div > img.black:hover,
-main > div.white > div > div > img.white:hover,
+main.black > div.chessboard > div > div > img.black:hover,
+main.white > div.chessboard > div > div > img.white:hover,
 .possibleMove:hover {
   cursor: pointer;
 }

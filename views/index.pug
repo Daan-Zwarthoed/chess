@@ -30,10 +30,10 @@ mixin row(number, nonePawnOrPieces, color)
             img(src=`images/${color}Pawn.png` alt=`${color} pawn` class=`${color} pawn`)
 
 body
-  main
+  main(class=userColor)
     section.verlorenPieces
       ul
-    div(class=userColor)
+    div.chessboard
       +row("0", "pieces", "black")
       +row("1", "pawn", "black")
       +row("2", "none")

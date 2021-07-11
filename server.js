@@ -62,30 +62,35 @@ app.post("/", (req, res) => {
               minutenBlack: results.timer.minutenBlack,
             };
           }
-          userColor =
-            results.users[0] === req.body.username ? "white" : "black";
-          if (results.users.includes(req.body.username)) {
-            popupStatus = "hidden";
-          } else if (results.users.length === 2) {
-            userColor = "spectate";
-            popupStatus = "full";
-          } else {
-            matchCollection.findOneAndUpdate(
-              { room: req.body.room },
-              {
-                $push: {
-                  users: req.body.username,
+
+          if (results.users) {
+            userColor =
+              results.users[0] === req.body.username ? "white" : "black";
+            if (results.users.includes(req.body.username)) {
+              popupStatus = "hidden";
+            } else if (results.users.length === 2) {
+              userColor = "spectate";
+              popupStatus = "full";
+            } else {
+              matchCollection.findOneAndUpdate(
+                { room: req.body.room },
+                {
+                  $push: {
+                    users: req.body.username,
+                  },
                 },
-              },
-              {
-                upsert: true,
-              }
-            );
-            popupStatus = "hidden";
+                {
+                  upsert: true,
+                }
+              );
+              popupStatus = "hidden";
+            }
           }
         } else {
           matchCollection.insertOne({
             room: req.body.room,
+            main: defaultMain,
+            aanZet: "white",
             users: [req.body.username],
           });
           userColor = "white";
@@ -114,7 +119,7 @@ io.on("connection", (socket) => {
       { room: req.room },
       {
         $set: {
-          chessboard: req.chessboard,
+          main: req.main,
           aanZet: req.aanZet,
         },
       },
@@ -122,8 +127,9 @@ io.on("connection", (socket) => {
         upsert: true,
       }
     );
+
     io.to(req.room).emit("load board", {
-      chessboard: req.chessboard,
+      main: req.main,
       aanZet: req.aanZet,
       username: req.username,
     });
@@ -143,6 +149,7 @@ io.on("connection", (socket) => {
         }
       )
       .then((results) => {
+        if (!results) return;
         if (results.value.aanZet === "black") {
           timer.secondeBlack--;
           if (timer.secondeBlack <= 0) {
@@ -182,9 +189,9 @@ io.on("connection", (socket) => {
       });
       matchCollection.findOne({ room: req.room }).then((results) => {
         if (results) {
-          if (results.chessboard) {
+          if (results.main) {
             io.to(req.room).emit("load board", {
-              chessboard: results.chessboard,
+              main: results.main,
               aanZet: results.aanZet,
             });
           }
@@ -199,7 +206,7 @@ io.on("connection", (socket) => {
         { room: req.room },
         {
           $set: {
-            chessboard: defaultChessboard,
+            main: defaultMain,
             aanZet: "white",
             timer: {
               secondeWhite: 0,
@@ -226,5 +233,5 @@ server.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
 
-const defaultChessboard =
-  '<div class="0"><div class="0"><img class="black rook" src="images/blackRook.png" alt="black rook"></div><div class="1"><img class="black knight" src="images/blackKnight.png" alt="black knight"></div><div class="2"><img class="black bishop" src="images/blackBishop.png" alt="black bishop"></div><div class="3"><img class="black queen" src="images/blackQueen.png" alt="black queen"></div><div class="4"><img class="black king" src="images/blackKing.png" alt="black king"></div><div class="5"><img class="black bishop" src="images/blackBishop.png" alt="black bishop"></div><div class="6"><img class="black knight" src="images/blackKnight.png" alt="black knight"></div><div class="7"><img class="black rook" src="images/blackRook.png" alt="black rook"></div></div><div class="1"><div class="0"><img class="black pawn" src="images/blackPawn.png" alt="black pawn"></div><div class="1"><img class="black pawn" src="images/blackPawn.png" alt="black pawn"></div><div class="2"><img class="black pawn" src="images/blackPawn.png" alt="black pawn"></div><div class="3"><img class="black pawn" src="images/blackPawn.png" alt="black pawn"></div><div class="4"><img class="black pawn" src="images/blackPawn.png" alt="black pawn"></div><div class="5"><img class="black pawn" src="images/blackPawn.png" alt="black pawn"></div><div class="6"><img class="black pawn" src="images/blackPawn.png" alt="black pawn"></div><div class="7"><img class="black pawn" src="images/blackPawn.png" alt="black pawn"></div></div><div class="2"><div class="0"></div><div class="1"></div><div class="2"></div><div class="3"></div><div class="4"></div><div class="5"></div><div class="6"></div><div class="7"></div></div><div class="3"><div class="0"></div><div class="1"></div><div class="2"></div><div class="3"></div><div class="4"></div><div class="5"></div><div class="6"></div><div class="7"></div></div><div class="4"><div class="0"></div><div class="1"></div><div class="2"></div><div class="3"></div><div class="4"></div><div class="5"></div><div class="6"></div><div class="7"></div></div><div class="5"><div class="0"></div><div class="1"></div><div class="2"></div><div class="3"></div><div class="4"></div><div class="5"></div><div class="6"></div><div class="7"></div></div><div class="6"><div class="0"><img class="white pawn" src="images/whitePawn.png" alt="white pawn"></div><div class="1"><img class="white pawn" src="images/whitePawn.png" alt="white pawn"></div><div class="2"><img class="white pawn" src="images/whitePawn.png" alt="white pawn"></div><div class="3"><img class="white pawn" src="images/whitePawn.png" alt="white pawn"></div><div class="4"><img class="white pawn" src="images/whitePawn.png" alt="white pawn"></div><div class="5"><img class="white pawn" src="images/whitePawn.png" alt="white pawn"></div><div class="6"><img class="white pawn" src="images/whitePawn.png" alt="white pawn"></div><div class="7"><img class="white pawn" src="images/whitePawn.png" alt="white pawn"></div></div><div class="7"><div class="0"><img class="white rook" src="images/whiteRook.png" alt="white rook"></div><div class="1"><img class="white knight" src="images/whiteKnight.png" alt="white knight"></div><div class="2"><img class="white bishop" src="images/whiteBishop.png" alt="white bishop"></div><div class="3"><img class="white queen" src="images/whiteQueen.png" alt="white queen"></div><div class="4"><img class="white king" src="images/whiteKing.png" alt="white king"></div><div class="5"><img class="white bishop" src="images/whiteBishop.png" alt="white bishop"></div><div class="6"><img class="white knight" src="images/whiteKnight.png" alt="white knight"></div><div class="7"><img class="white rook" src="images/whiteRook.png" alt="white rook"></div></div>';
+const defaultMain =
+  '<section class="verlorenPieces"><ul></ul></section><div class="chessboard"><div class="0"><div class="0"><img class="black rook" src="images/blackRook.png" alt="black rook"></div><div class="1"><img class="black knight" src="images/blackKnight.png" alt="black knight"></div><div class="2"><img class="black bishop" src="images/blackBishop.png" alt="black bishop"></div><div class="3"><img class="black queen" src="images/blackQueen.png" alt="black queen"></div><div class="4"><img class="black king" src="images/blackKing.png" alt="black king"></div><div class="5"><img class="black bishop" src="images/blackBishop.png" alt="black bishop"></div><div class="6"><img class="black knight" src="images/blackKnight.png" alt="black knight"></div><div class="7"><img class="black rook" src="images/blackRook.png" alt="black rook"></div></div><div class="1"><div class="0"><img class="black pawn" src="images/blackPawn.png" alt="black pawn"></div><div class="1"><img class="black pawn" src="images/blackPawn.png" alt="black pawn"></div><div class="2"><img class="black pawn" src="images/blackPawn.png" alt="black pawn"></div><div class="3"><img class="black pawn" src="images/blackPawn.png" alt="black pawn"></div><div class="4"><img class="black pawn" src="images/blackPawn.png" alt="black pawn"></div><div class="5"><img class="black pawn" src="images/blackPawn.png" alt="black pawn"></div><div class="6"><img class="black pawn" src="images/blackPawn.png" alt="black pawn"></div><div class="7"><img class="black pawn" src="images/blackPawn.png" alt="black pawn"></div></div><div class="2"><div class="0"></div><div class="1"></div><div class="2"></div><div class="3"></div><div class="4"></div><div class="5"></div><div class="6"></div><div class="7"></div></div><div class="3"><div class="0"></div><div class="1"></div><div class="2"></div><div class="3"></div><div class="4"></div><div class="5"></div><div class="6"></div><div class="7"></div></div><div class="4"><div class="0"></div><div class="1"></div><div class="2"></div><div class="3"></div><div class="4"></div><div class="5"></div><div class="6"></div><div class="7"></div></div><div class="5"><div class="0"></div><div class="1"></div><div class="2"></div><div class="3"></div><div class="4"></div><div class="5"></div><div class="6"></div><div class="7"></div></div><div class="6"><div class="0"><img class="white pawn" src="images/whitePawn.png" alt="white pawn"></div><div class="1"><img class="white pawn" src="images/whitePawn.png" alt="white pawn"></div><div class="2"><img class="white pawn" src="images/whitePawn.png" alt="white pawn"></div><div class="3"><img class="white pawn" src="images/whitePawn.png" alt="white pawn"></div><div class="4"><img class="white pawn" src="images/whitePawn.png" alt="white pawn"></div><div class="5"><img class="white pawn" src="images/whitePawn.png" alt="white pawn"></div><div class="6"><img class="white pawn" src="images/whitePawn.png" alt="white pawn"></div><div class="7"><img class="white pawn" src="images/whitePawn.png" alt="white pawn"></div></div><div class="7"><div class="0"><img class="white rook" src="images/whiteRook.png" alt="white rook"></div><div class="1"><img class="white knight" src="images/whiteKnight.png" alt="white knight"></div><div class="2"><img class="white bishop" src="images/whiteBishop.png" alt="white bishop"></div><div class="3"><img class="white queen" src="images/whiteQueen.png" alt="white queen"></div><div class="4"><img class="white king" src="images/whiteKing.png" alt="white king"></div><div class="5"><img class="white bishop" src="images/whiteBishop.png" alt="white bishop"></div><div class="6"><img class="white knight" src="images/whiteKnight.png" alt="white knight"></div><div class="7"><img class="white rook" src="images/whiteRook.png" alt="white rook"></div></div></div><section class="verlorenPieces"><ul></ul></section>';
