@@ -108,6 +108,15 @@ if (form) {
 
 socket.emit("join room", { room, username });
 
+if (
+  clockBlackMinuten.innerHTML != 10 ||
+  clockBlackSeconde.innerHTML != 0 ||
+  clockWhiteMinuten.innerHTML != 10 ||
+  clockWhiteSeconde.innerHTML != 0
+) {
+  socket.emit("start timer", room);
+}
+
 socket.on("timer update", function (req) {
   clockWhiteMinuten.innerHTML = req.minutenWhite;
   clockWhiteSeconde.innerHTML = req.secondeWhite;
@@ -130,8 +139,6 @@ socket.on("load board", function (req) {
     main.innerHTML = req.main;
     aanZet = req.aanZet;
 
-    checkCheckMate();
-
     chessboard = document.querySelector("main > div");
 
     alleBlokjes = document.querySelectorAll("main > div > div > div");
@@ -148,10 +155,13 @@ socket.on("load board", function (req) {
       selectPiece(event);
     });
 
+    checkCheckMate();
+
     for (let i = 0; i < alleBlokjes.length; i++) {
       alleBlokjes[i].classList.remove("possibleMove");
       alleBlokjes[i].classList.remove("enemyMove");
     }
+    attackBestaat = false;
   }
 });
 
@@ -1106,7 +1116,6 @@ function movePossible(piece) {
 function checkOfCastlenMag(event) {
   if (checkInProgress == false) {
     checkInProgress = true;
-
     if (
       event.target.classList[0] == "white" &&
       event.target.parentElement ==
@@ -1202,7 +1211,7 @@ function checkCheckMate() {
   let piecesBlack = document.querySelectorAll(
     "main > div > div > div > .black"
   );
-
+  attackBestaat = false;
   checkInProgress = true;
   let userColorCopy = userColor;
   userColor = aanZet;
@@ -1488,10 +1497,6 @@ function selectPiece(event) {
     } else {
       aanZet = "white";
     }
-
-    piecesWhite = document.querySelectorAll("main > div > div > div > .white");
-
-    piecesBlack = document.querySelectorAll("main > div > div > div > .black");
 
     checkCheckMate();
 
@@ -1920,7 +1925,10 @@ function selectPiece(event) {
               chessboard.children[rowPiece].children[i].children[0]
                 .classList[1] == "rook"
             ) {
-              if (rightWhiteRookMoved == false) {
+              if (
+                rightWhiteRookMoved == false &&
+                !document.querySelector(".pieceAttackingKing")
+              ) {
                 chessboard.children[rowPiece].children[i - 1].classList.add(
                   "possibleMove"
                 );
@@ -1978,7 +1986,10 @@ function selectPiece(event) {
               chessboard.children[rowPiece].children[i].children[0]
                 .classList[1] == "rook"
             ) {
-              if (rightBlackRookMoved == false) {
+              if (
+                rightBlackRookMoved == false &&
+                !document.querySelector(".pieceAttackingKing")
+              ) {
                 chessboard.children[rowPiece].children[i - 1].classList.add(
                   "possibleMove"
                 );

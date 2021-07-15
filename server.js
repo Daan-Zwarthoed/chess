@@ -33,14 +33,51 @@ client.connect((err) => {
   matchCollection = db.collection("matches");
 });
 
-app.get("/", (req, res) => {
-  res.render("index", { popupStatus: "show" });
-});
-
 let popupStatus;
 let userColor;
 let timer;
-let intervalIsActiveForRoom = [];
+let timerInRoom = [];
+
+function updateTimer() {
+  timerInRoom.forEach((timerRoom) => {
+    timerInRoom.filter((e) => e !== timerRoom);
+    matchCollection.findOne({ room: timerRoom }).then((results) => {
+      if (!results) return;
+      let personalTimer = results.timer;
+      if (results.aanZet === "black") {
+        personalTimer.secondeBlack--;
+        if (personalTimer.secondeBlack <= 0) {
+          personalTimer.minutenBlack--;
+          personalTimer.secondeBlack = 59;
+        }
+      } else {
+        personalTimer.secondeWhite--;
+        if (personalTimer.secondeWhite <= 0) {
+          personalTimer.minutenWhite--;
+          personalTimer.secondeWhite = 59;
+        }
+      }
+      matchCollection.findOneAndUpdate(
+        { room: timerRoom },
+        {
+          $set: {
+            timer: personalTimer,
+          },
+        },
+        {
+          upsert: true,
+        }
+      );
+      io.to(timerRoom).emit("timer update", personalTimer);
+    });
+  });
+}
+
+setInterval(updateTimer, 1000);
+
+app.get("/", (req, res) => {
+  res.render("index", { popupStatus: "show" });
+});
 
 app.post("/", (req, res) => {
   if (req.body.room) {
@@ -92,6 +129,7 @@ app.post("/", (req, res) => {
             main: defaultMain,
             aanZet: "white",
             users: [req.body.username],
+            timer: timer,
           });
           userColor = "white";
           popupStatus = "hidden";
@@ -135,48 +173,15 @@ io.on("connection", (socket) => {
     });
   });
 
-  function updateTimer() {
-    matchCollection
-      .findOneAndUpdate(
-        { room: room },
-        {
-          $set: {
-            timer: timer,
-          },
-        },
-        {
-          upsert: true,
-        }
-      )
-      .then((results) => {
-        if (!results) return;
-        if (results.value.aanZet === "black") {
-          timer.secondeBlack--;
-          if (timer.secondeBlack <= 0) {
-            timer.minutenBlack--;
-            timer.secondeBlack = 59;
-          }
-        } else {
-          timer.secondeWhite--;
-          if (timer.secondeWhite <= 0) {
-            timer.minutenWhite--;
-            timer.secondeWhite = 59;
-          }
-        }
-      });
-    io.to(room).emit("timer update", timer);
-  }
-
   socket.on("start timer", (req) => {
-    if (!intervalIsActiveForRoom.includes(req)) {
-      intervalIsActiveForRoom.push(req);
+    if (!timerInRoom.includes(req)) {
+      timerInRoom.push(req);
       room = req;
       matchCollection.findOne({ room: req }).then((results) => {
         if (results) {
           results.timer = timer;
         }
       });
-      setInterval(updateTimer, 1000);
     }
   });
 
@@ -221,9 +226,7 @@ io.on("connection", (socket) => {
         }
       )
       .then(() => {
-        intervalIsActiveForRoom = intervalIsActiveForRoom.filter(
-          (e) => e !== req.room
-        );
+        timerInRoom = timerInRoom.filter((e) => e !== req.room);
         io.to(req.room).emit("page reload");
       });
   });
