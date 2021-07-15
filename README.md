@@ -52,6 +52,6 @@ Timer werkt beter, winnen kan en bugs gefixed
 Verloren stukken worden ook opgeslagen, aan vormgeving gewerkt en gedeployed
 
 6 - 15-07-2021, 4.5 uur <br>
-afgemaakt documentatie van het project
+afgemaakt documentatie van het project, de timer weer anders gedaan en een paar andere bugs gefixed
 
 in totaal 28 uur
