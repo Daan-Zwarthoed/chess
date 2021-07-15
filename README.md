@@ -37,7 +37,7 @@ in totaal 29 uur en 20 minuten
 
 # chess tweede srp
 
-Toegevoegd dat je het ook daadwerkelijk met andere online kan spelen
+Toegevoegd dat je het ook daadwerkelijk met andere online kan spelen. Dit doe ik doormiddel van socket.io. Dit is een package die ervoor zorgt dat je client-side javascript kan comminuceren met je server-side en die kan dan weer communiceren naar de clien-side van een andere gebruiker. De matches sla ik dan ook op in een database van mongoose. Hierdoor kan je dus met iemand anders samen schaken spelen.
 
 1 - 30-06-2021, 4 uur <br>
 server en templating engine toegevoegd en begin gemaakt aan socket.io
